@@ -317,7 +317,7 @@ export const OrderTrackingModal: React.FC<Props> = ({ order, isOpen, onClose }) 
             </span>
             <div className="flex gap-2">
               <a
-                href={`https://wa.me/919830045678?text=${whatsappMessage}`}
+                href={`https://wa.me/${siteSettings.whatsapp.replace(/\D/g, '')}?text=${whatsappMessage}`}
                 target="_blank"
                 rel="noreferrer"
                 className="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 transition-colors"

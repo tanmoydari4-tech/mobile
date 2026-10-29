@@ -218,9 +218,17 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   );
 
   // Site Settings
-  const [siteSettings, setSiteSettings] = useState<SiteSettings>(() =>
-    getStoredItem<SiteSettings>('site_settings', INITIAL_SITE_SETTINGS)
-  );
+  const [siteSettings, setSiteSettings] = useState<SiteSettings>(() => {
+    const stored = getStoredItem<SiteSettings>('site_settings', INITIAL_SITE_SETTINGS);
+    if (stored.phone.includes('98300') || stored.whatsapp.includes('98300')) {
+      return {
+        ...stored,
+        phone: '+91 94335 23525',
+        whatsapp: '+91 94335 23525'
+      };
+    }
+    return stored;
+  });
 
   // Support inquiries
   const [supportInquiries, setSupportInquiries] = useState<SupportInquiry[]>(() =>
