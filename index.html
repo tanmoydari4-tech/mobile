@@ -12,28 +12,120 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script type="importmap">
+      {
+        "imports": {
+          "react": "https://esm.sh/react@19.0.1",
+          "react/jsx-runtime": "https://esm.sh/react@19.0.1/jsx-runtime",
+          "react-dom": "https://esm.sh/react-dom@19.0.1?deps=react@19.0.1",
+          "react-dom/client": "https://esm.sh/react-dom@19.0.1/client?deps=react@19.0.1",
+          "lucide-react": "https://esm.sh/lucide-react@0.546.0?deps=react@19.0.1"
+        }
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script>
-      // Automatic fallback when deployed directly from 'main' branch root on GitHub Pages
-      window.addEventListener('DOMContentLoaded', function () {
+      // Automatic runtime compiler for GitHub Pages when deployed directly from 'main' branch root
+      window.addEventListener('DOMContentLoaded', async function () {
         var isViteDev = !!document.querySelector('script[src*="@vite/client"]');
         var isBuiltDist = !!document.querySelector('script[src*="assets/index-"]');
-        if (!isViteDev && !isBuiltDist) {
-          var link = document.createElement('link');
-          link.rel = 'stylesheet';
-          link.href = './gh-bundle/app.css';
-          document.head.appendChild(link);
+        if (isViteDev || isBuiltDist) return;
 
-          var script = document.createElement('script');
-          script.type = 'module';
-          script.src = './gh-bundle/app.js';
-          document.body.appendChild(script);
+        // 1. Load Tailwind CSS v4 browser runtime for styling on static GitHub Pages
+        var twScript = document.createElement('script');
+        twScript.src = 'https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4';
+        document.head.appendChild(twScript);
+
+        // 2. Load Babel Standalone to compile TSX/TS modules directly from main branch
+        await new Promise(function (resolve, reject) {
+          var bScript = document.createElement('script');
+          bScript.src = 'https://unpkg.com/@babel/standalone@7.26.9/babel.min.js';
+          bScript.onload = resolve;
+          bScript.onerror = reject;
+          document.head.appendChild(bScript);
+        });
+
+        var modules = [
+          'src/types.ts',
+          'src/data/initialData.ts',
+          'src/context/StoreContext.tsx',
+          'src/components/AnnouncementBar.tsx',
+          'src/components/LocationSelectorModal.tsx',
+          'src/components/Navbar.tsx',
+          'src/components/HeroBanner.tsx',
+          'src/components/BrandBar.tsx',
+          'src/components/ProductCard.tsx',
+          'src/components/ProductDetailsModal.tsx',
+          'src/components/CompareModal.tsx',
+          'src/components/CartDrawer.tsx',
+          'src/components/CheckoutModal.tsx',
+          'src/components/OrderTrackingModal.tsx',
+          'src/components/CustomerProfileModal.tsx',
+          'src/components/ContactAndLocatorModal.tsx',
+          'src/components/PolicyModal.tsx',
+          'src/components/AdminPanel.tsx',
+          'src/components/Footer.tsx',
+          'src/App.tsx',
+          'src/main.tsx'
+        ];
+
+        function resolveRelative(fromFile, relPath) {
+          var parts = fromFile.split('/');
+          parts.pop();
+          var relParts = relPath.split('/');
+          for (var i = 0; i < relParts.length; i++) {
+            if (relParts[i] === '.' || relParts[i] === '') continue;
+            if (relParts[i] === '..') parts.pop();
+            else parts.push(relParts[i]);
+          }
+          return parts.join('/');
         }
+
+        // Fetch all source files in parallel
+        var sources = {};
+        await Promise.all(
+          modules.map(async function (modPath) {
+            var res = await fetch('./' + modPath);
+            sources[modPath] = await res.text();
+          })
+        );
+
+        var blobMap = {};
+        for (var i = 0; i < modules.length; i++) {
+          var modPath = modules[i];
+          var rawCode = sources[modPath].replace(/import\s+['"]\.\/index\.css['"];?/g, '');
+
+          var compiled = window.Babel.transform(rawCode + '\nexport {};', {
+            filename: modPath,
+            presets: [
+              ['typescript', { isTSX: true, allExtensions: true }],
+              ['react', { runtime: 'automatic' }]
+            ]
+          }).code;
+
+          // Rewrite relative imports to compiled Blob URLs
+          compiled = compiled.replace(
+            /(from\s+|import\s+|import\s*\()(['"])(\.[^'"]+)(['"])/g,
+            function (match, prefix, q1, spec, q2) {
+              var resolved = resolveRelative(modPath, spec);
+              var noExt = resolved.replace(/\.(tsx|ts)$/, '');
+              var blobUrl = blobMap[resolved] || blobMap[noExt];
+              return blobUrl ? prefix + q1 + blobUrl + q2 : match;
+            }
+          );
+
+          var blob = new Blob([compiled], { type: 'text/javascript' });
+          var url = URL.createObjectURL(blob);
+          blobMap[modPath] = url;
+          blobMap[modPath.replace(/\.(tsx|ts)$/, '')] = url;
+        }
+
+        // Mount application
+        import(blobMap['src/main.tsx']);
       });
     </script>
   </body>
 </html>
-
