@@ -126,27 +126,27 @@ export const AdminPanel: React.FC<Props> = ({ isOpen, onClose, onViewOrderDetail
 
   if (!isAdminAuthenticated) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in">
-        <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200">
-          <div className="p-5 px-6 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in overflow-y-auto">
+        <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full my-auto overflow-hidden border border-slate-200">
+          <div className="p-4 sm:p-5 sm:px-6 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/25">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/25 shrink-0">
                 <Shield className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="font-black text-lg text-white">Admin Portal Login</h2>
-                <p className="text-xs text-slate-400">Restricted to Authorized Store Managers</p>
+                <h2 className="font-black text-base sm:text-lg text-white">Admin Portal Login</h2>
+                <p className="text-[11px] sm:text-xs text-slate-400">Restricted to Authorized Store Managers</p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          <form onSubmit={handleAdminLoginSubmit} className="p-6 space-y-4 text-xs">
+          <form onSubmit={handleAdminLoginSubmit} autoComplete="off" className="p-5 sm:p-6 space-y-4 text-xs">
             {adminLoginError && (
               <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 font-semibold flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 shrink-0" />
@@ -161,10 +161,11 @@ export const AdminPanel: React.FC<Props> = ({ isOpen, onClose, onViewOrderDetail
                 <input
                   type="text"
                   required
+                  autoComplete="off"
                   value={adminEmail}
                   onChange={e => setAdminEmail(e.target.value)}
-                  placeholder="admin@smartzone.com"
-                  className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  placeholder="Enter Admin Email or ID"
+                  className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none text-xs sm:text-sm"
                 />
               </div>
             </div>
@@ -176,10 +177,11 @@ export const AdminPanel: React.FC<Props> = ({ isOpen, onClose, onViewOrderDetail
                 <input
                   type="password"
                   required
+                  autoComplete="new-password"
                   value={adminPassword}
                   onChange={e => setAdminPassword(e.target.value)}
                   placeholder="Enter admin password"
-                  className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none text-xs sm:text-sm"
                 />
               </div>
             </div>
@@ -191,26 +193,6 @@ export const AdminPanel: React.FC<Props> = ({ isOpen, onClose, onViewOrderDetail
               <Shield className="w-4 h-4" />
               <span>Sign In to Admin Portal</span>
             </button>
-
-            <div className="pt-3 border-t border-slate-200 space-y-2">
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-[11px] text-slate-600">
-                <div>
-                  <span className="block font-bold text-slate-800">Store Manager Credentials:</span>
-                  <span>ID: <strong>admin@smartzone.com</strong> | Pass: <strong>admin123</strong></span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAdminEmail('admin@smartzone.com');
-                    setAdminPassword('admin123');
-                    setAdminLoginError(null);
-                  }}
-                  className="px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold shrink-0 cursor-pointer"
-                >
-                  Auto-Fill
-                </button>
-              </div>
-            </div>
           </form>
         </div>
       </div>
@@ -326,36 +308,36 @@ export const AdminPanel: React.FC<Props> = ({ isOpen, onClose, onViewOrderDetail
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md overflow-y-auto animate-fade-in">
-      <div className="bg-white rounded-3xl shadow-2xl max-w-7xl w-full my-auto overflow-hidden border border-slate-200 relative max-h-[94vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-1.5 sm:p-4 bg-slate-950/85 backdrop-blur-md overflow-y-auto animate-fade-in">
+      <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl max-w-7xl w-full my-auto overflow-hidden border border-slate-200 relative max-h-[95dvh] flex flex-col">
         {/* Admin Header */}
-        <div className="p-4 px-6 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800 shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/25">
-              <Shield className="w-5 h-5 text-white" />
+        <div className="p-3 sm:p-4 sm:px-6 bg-slate-900 text-white flex items-center justify-between gap-2 border-b border-slate-800 shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/25 shrink-0">
+              <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h2 className="font-black text-lg text-white">SmartZone Admin Operations</h2>
-                <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">
+                <h2 className="font-black text-sm sm:text-lg text-white truncate">SmartZone Admin</h2>
+                <span className="hidden sm:inline-block px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">
                   Live Database
                 </span>
               </div>
-              <p className="text-xs text-slate-400">Inventory Management, Order Dispatch, Local Delivery &amp; Store Analytics</p>
+              <p className="text-[10px] sm:text-xs text-slate-400 truncate">Inventory, Orders &amp; Store Analytics</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button
               onClick={logoutAdmin}
-              className="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="px-2.5 sm:px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-[11px] sm:text-xs flex items-center gap-1 sm:gap-1.5 transition-colors cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" />
-              <span>Admin Logout</span>
+              <span>Logout</span>
             </button>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>

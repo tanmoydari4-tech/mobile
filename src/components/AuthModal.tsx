@@ -116,26 +116,26 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
-      <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in overflow-y-auto">
+      <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl max-w-md w-full my-auto overflow-hidden border border-slate-200 max-h-[94dvh] flex flex-col">
         {/* Header */}
-        <div className="p-5 px-6 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/25">
-              <User className="w-5 h-5" />
+        <div className="p-4 sm:p-5 sm:px-6 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800 shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/25 shrink-0">
+              <User className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
-              <h2 className="font-extrabold text-lg text-white">
+              <h2 className="font-extrabold text-base sm:text-lg text-white">
                 {mode === 'login' ? 'Customer Sign In' : 'Create Customer Account'}
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-[11px] sm:text-xs text-slate-400">
                 SmartZone Mobile Store Official Account
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -143,21 +143,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
         {/* Checkout Required Notice */}
         {requireForCheckout && (
-          <div className="px-6 py-3 bg-blue-50 border-b border-blue-200 flex items-center gap-2.5 text-xs text-blue-900 font-semibold">
+          <div className="px-4 sm:px-6 py-2.5 sm:py-3 bg-blue-50 border-b border-blue-200 flex items-center gap-2 text-xs text-blue-900 font-semibold shrink-0">
             <ShoppingBag className="w-4 h-4 text-blue-600 shrink-0" />
             <span>Please Sign In or Create an Account to place your order.</span>
           </div>
         )}
 
         {/* Mode Switch Tabs */}
-        <div className="grid grid-cols-2 border-b border-slate-200 bg-slate-50 p-1.5 m-5 mb-0 rounded-2xl text-xs font-bold">
+        <div className="grid grid-cols-2 border-b border-slate-200 bg-slate-50 p-1.5 mx-4 sm:mx-5 mt-4 mb-0 rounded-2xl text-xs font-bold shrink-0">
           <button
             type="button"
             onClick={() => {
               setMode('login');
               setErrorMsg(null);
             }}
-            className={`py-2.5 rounded-xl transition-all ${
+            className={`py-2 sm:py-2.5 rounded-xl transition-all ${
               mode === 'login'
                 ? 'bg-slate-900 text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
@@ -171,7 +171,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               setMode('register');
               setErrorMsg(null);
             }}
-            className={`py-2.5 rounded-xl transition-all ${
+            className={`py-2 sm:py-2.5 rounded-xl transition-all ${
               mode === 'register'
                 ? 'bg-slate-900 text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
@@ -182,7 +182,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         </div>
 
         {/* Body */}
-        <div className="p-6 space-y-4 text-xs">
+        <div className="p-4 sm:p-6 space-y-4 text-xs overflow-y-auto flex-1">
           {errorMsg && (
             <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 font-semibold flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />

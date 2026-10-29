@@ -740,16 +740,19 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const loginAdmin = (email: string, password: string) => {
     const cleanEmail = email.trim().toLowerCase();
-    if (
-      (cleanEmail === 'admin@smartzone.com' || cleanEmail === 'admin') &&
-      password === 'admin123'
-    ) {
+    const isValidAdminId =
+      cleanEmail === 'admin@smartzone.com' ||
+      cleanEmail === 'admin' ||
+      cleanEmail === 'tanmoydari4@gmail.com' ||
+      cleanEmail === 'tanmoy';
+
+    if (isValidAdminId && password.trim() === 'Tanmoy') {
       setIsAdminAuthenticated(true);
       return { success: true, message: 'Admin login successful!' };
     }
     return {
       success: false,
-      message: 'Invalid Admin credentials. Use admin@smartzone.com / admin123'
+      message: 'Invalid Admin ID or Password. Please try again.'
     };
   };
 

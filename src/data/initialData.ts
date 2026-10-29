@@ -1033,7 +1033,7 @@ export const INITIAL_USERS: User[] = [
     name: 'SmartZone Store Manager',
     email: 'admin@smartzone.com',
     phone: '+91 98300 45678',
-    password: 'admin123',
+    password: 'Tanmoy',
     role: 'admin',
     wishlist: [],
     addresses: []
