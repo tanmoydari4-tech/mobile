@@ -1011,6 +1011,7 @@ export const INITIAL_USERS: User[] = [
     name: 'Rahul Sharma',
     email: 'rahul.sharma@example.com',
     phone: '+91 98765 43210',
+    password: '123456',
     role: 'customer',
     wishlist: ['prod-samsung-s24-ultra', 'prod-acc-tws-pro-anc'],
     addresses: [
@@ -1032,6 +1033,7 @@ export const INITIAL_USERS: User[] = [
     name: 'SmartZone Store Manager',
     email: 'admin@smartzone.com',
     phone: '+91 98300 45678',
+    password: 'admin123',
     role: 'admin',
     wishlist: [],
     addresses: []

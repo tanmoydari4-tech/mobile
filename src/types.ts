@@ -166,6 +166,7 @@ export interface User {
   name: string;
   email: string;
   phone: string;
+  password?: string;
   role: 'customer' | 'admin';
   addresses: SavedAddress[];
   wishlist: string[]; // product IDs

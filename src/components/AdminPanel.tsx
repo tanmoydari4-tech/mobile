@@ -29,7 +29,10 @@ import {
   X,
   Save,
   MessageSquare,
-  Users
+  Users,
+  Lock,
+  LogOut,
+  Mail
 } from 'lucide-react';
 import { Product, ProductVariant, Order, OrderStatus, PaymentStatus, Coupon, DeliveryArea, ProductCategory } from '../types';
 
@@ -61,8 +64,9 @@ export const AdminPanel: React.FC<Props> = ({ isOpen, onClose, onViewOrderDetail
     updateSiteSettings,
     supportInquiries,
     updateInquiryStatus,
-    currentUser,
-    loginAs
+    isAdminAuthenticated,
+    loginAdmin,
+    logoutAdmin
   } = useStore();
 
   const [activeTab, setActiveTab] = useState<
@@ -101,7 +105,117 @@ export const AdminPanel: React.FC<Props> = ({ isOpen, onClose, onViewOrderDetail
   const [settingsForm, setSettingsForm] = useState(siteSettings);
   const [settingsSavedToast, setSettingsSavedToast] = useState(false);
 
+  // Admin Login Form State
+  const [adminEmail, setAdminEmail] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
+  const [adminLoginError, setAdminLoginError] = useState<string | null>(null);
+
   if (!isOpen) return null;
+
+  const handleAdminLoginSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setAdminLoginError(null);
+    const res = loginAdmin(adminEmail, adminPassword);
+    if (!res.success) {
+      setAdminLoginError(res.message);
+    } else {
+      setAdminEmail('');
+      setAdminPassword('');
+    }
+  };
+
+  if (!isAdminAuthenticated) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in">
+        <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200">
+          <div className="p-5 px-6 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/25">
+                <Shield className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="font-black text-lg text-white">Admin Portal Login</h2>
+                <p className="text-xs text-slate-400">Restricted to Authorized Store Managers</p>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <form onSubmit={handleAdminLoginSubmit} className="p-6 space-y-4 text-xs">
+            {adminLoginError && (
+              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 font-semibold flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 shrink-0" />
+                <span>{adminLoginError}</span>
+              </div>
+            )}
+
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">Admin Email / ID *</label>
+              <div className="relative">
+                <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  required
+                  value={adminEmail}
+                  onChange={e => setAdminEmail(e.target.value)}
+                  placeholder="admin@smartzone.com"
+                  className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">Admin Password *</label>
+              <div className="relative">
+                <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="password"
+                  required
+                  value={adminPassword}
+                  onChange={e => setAdminPassword(e.target.value)}
+                  placeholder="Enter admin password"
+                  className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-3 bg-slate-900 hover:bg-blue-600 text-white font-extrabold rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <Shield className="w-4 h-4" />
+              <span>Sign In to Admin Portal</span>
+            </button>
+
+            <div className="pt-3 border-t border-slate-200 space-y-2">
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-[11px] text-slate-600">
+                <div>
+                  <span className="block font-bold text-slate-800">Store Manager Credentials:</span>
+                  <span>ID: <strong>admin@smartzone.com</strong> | Pass: <strong>admin123</strong></span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAdminEmail('admin@smartzone.com');
+                    setAdminPassword('admin123');
+                    setAdminLoginError(null);
+                  }}
+                  className="px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold shrink-0 cursor-pointer"
+                >
+                  Auto-Fill
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   // Calculate Dashboard Metrics
   const totalSales = orders.reduce((sum, o) => o.orderStatus !== 'cancelled' ? sum + o.totalAmount : sum, 0);
@@ -232,14 +346,13 @@ export const AdminPanel: React.FC<Props> = ({ isOpen, onClose, onViewOrderDetail
           </div>
 
           <div className="flex items-center gap-2">
-            {currentUser?.role !== 'admin' && (
-              <button
-                onClick={() => loginAs('admin')}
-                className="px-3 py-1.5 rounded-xl bg-amber-500 text-slate-950 font-black text-xs"
-              >
-                Switch to Admin Session
-              </button>
-            )}
+            <button
+              onClick={logoutAdmin}
+              className="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Admin Logout</span>
+            </button>
             <button
               onClick={onClose}
               className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"

@@ -15,6 +15,7 @@ import { LocationSelectorModal } from './components/LocationSelectorModal';
 import { ContactAndLocatorModal } from './components/ContactAndLocatorModal';
 import { PolicyModal } from './components/PolicyModal';
 import { AdminPanel } from './components/AdminPanel';
+import { AuthModal } from './components/AuthModal';
 import { Footer } from './components/Footer';
 import {
   Filter,
@@ -39,7 +40,7 @@ import {
 import { Product, ProductCategory, Order } from './types';
 
 const StoreFront: React.FC = () => {
-  const { products, selectedPincode, siteSettings, orders } = useStore();
+  const { products, selectedPincode, siteSettings, orders, currentUser } = useStore();
 
   // Navigation and Filter States
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -60,6 +61,8 @@ const StoreFront: React.FC = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [authForCheckout, setAuthForCheckout] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [activeTrackingOrder, setActiveTrackingOrder] = useState<Order | null>(null);
   const [activePolicy, setActivePolicy] = useState<
@@ -208,11 +211,29 @@ const StoreFront: React.FC = () => {
       {/* 2. Main Navigation Bar */}
       <Navbar
         onOpenCart={() => setIsCartOpen(true)}
-        onOpenWishlist={() => setIsProfileOpen(true)}
+        onOpenWishlist={() => {
+          if (!currentUser) {
+            setAuthForCheckout(false);
+            setIsAuthOpen(true);
+          } else {
+            setIsProfileOpen(true);
+          }
+        }}
         onOpenCompare={() => setIsCompareOpen(true)}
         onOpenLocation={() => setIsLocationOpen(true)}
         onOpenContact={() => setIsContactOpen(true)}
-        onOpenProfile={() => setIsProfileOpen(true)}
+        onOpenProfile={() => {
+          if (!currentUser) {
+            setAuthForCheckout(false);
+            setIsAuthOpen(true);
+          } else {
+            setIsProfileOpen(true);
+          }
+        }}
+        onOpenAuth={() => {
+          setAuthForCheckout(false);
+          setIsAuthOpen(true);
+        }}
         onOpenAdmin={() => setIsAdminOpen(true)}
         onSelectProduct={prod => setSelectedProduct(prod)}
         onNavigateCategory={cat => {
@@ -800,7 +821,31 @@ const StoreFront: React.FC = () => {
         <CartDrawer
           isOpen={isCartOpen}
           onClose={() => setIsCartOpen(false)}
-          onProceedCheckout={() => setIsCheckoutOpen(true)}
+          onProceedCheckout={() => {
+            if (!currentUser) {
+              setAuthForCheckout(true);
+              setIsAuthOpen(true);
+            } else {
+              setIsCheckoutOpen(true);
+            }
+          }}
+        />
+      )}
+
+      {isAuthOpen && (
+        <AuthModal
+          isOpen={isAuthOpen}
+          onClose={() => {
+            setIsAuthOpen(false);
+            setAuthForCheckout(false);
+          }}
+          requireForCheckout={authForCheckout}
+          onSuccess={() => {
+            if (authForCheckout) {
+              setAuthForCheckout(false);
+              setIsCheckoutOpen(true);
+            }
+          }}
         />
       )}
 

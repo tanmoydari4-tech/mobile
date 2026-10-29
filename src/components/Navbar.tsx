@@ -30,6 +30,7 @@ interface NavbarProps {
   onOpenLocation: () => void;
   onOpenContact: () => void;
   onOpenProfile: () => void;
+  onOpenAuth: () => void;
   onOpenAdmin: () => void;
   onSelectProduct: (product: Product) => void;
   onNavigateCategory: (category: string) => void;
@@ -44,6 +45,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenLocation,
   onOpenContact,
   onOpenProfile,
+  onOpenAuth,
   onOpenAdmin,
   onSelectProduct,
   onNavigateCategory,
@@ -58,7 +60,8 @@ export const Navbar: React.FC<NavbarProps> = ({
     selectedPincode,
     deliveryAreas,
     currentUser,
-    loginAs,
+    logoutCustomer,
+    isAdminAuthenticated,
     siteSettings
   } = useStore();
 
@@ -282,116 +285,91 @@ export const Navbar: React.FC<NavbarProps> = ({
               )}
             </button>
 
-            {/* User Account / Role dropdown */}
-            <div ref={userMenuRef} className="relative">
+            {/* User Account / Sign In button */}
+            {!currentUser ? (
               <button
-                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="flex items-center gap-2 p-1.5 sm:px-3 sm:py-2 rounded-xl bg-slate-100 hover:bg-slate-200/80 transition-colors text-xs font-semibold text-slate-800"
+                onClick={onOpenAuth}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition-colors shadow-xs cursor-pointer"
               >
-                <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-[11px]">
-                  {currentUser?.name.charAt(0) || 'U'}
-                </div>
-                <span className="hidden md:inline max-w-[90px] truncate">
-                  {currentUser?.name.split(' ')[0] || 'Account'}
-                </span>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-500 hidden md:inline" />
+                <User className="w-4 h-4" />
+                <span>Sign In</span>
               </button>
-
-              {isUserMenuOpen && (
-                <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden z-50 animate-fade-in text-xs">
-                  <div className="p-4 bg-slate-900 text-white">
-                    <p className="font-bold text-sm truncate">{currentUser?.name}</p>
-                    <p className="text-[11px] text-slate-300 truncate">{currentUser?.email}</p>
-                    <div className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-400/30 font-semibold text-[10px]">
-                      {currentUser?.role === 'admin' ? 'Store Administrator' : 'Customer Account'}
-                    </div>
+            ) : (
+              <div ref={userMenuRef} className="relative">
+                <button
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className="flex items-center gap-2 p-1.5 sm:px-3 sm:py-2 rounded-xl bg-slate-100 hover:bg-slate-200/80 transition-colors text-xs font-semibold text-slate-800 cursor-pointer"
+                >
+                  <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-[11px]">
+                    {currentUser.name.charAt(0).toUpperCase()}
                   </div>
+                  <span className="hidden md:inline max-w-[90px] truncate">
+                    {currentUser.name.split(' ')[0]}
+                  </span>
+                  <ChevronDown className="w-3.5 h-3.5 text-slate-500 hidden md:inline" />
+                </button>
 
-                  <div className="p-2 space-y-1">
-                    <button
-                      onClick={() => {
-                        setIsUserMenuOpen(false);
-                        onOpenProfile();
-                      }}
-                      className="w-full px-3 py-2 rounded-xl hover:bg-slate-100 text-slate-700 flex items-center gap-2.5 transition-colors font-medium text-left"
-                    >
-                      <User className="w-4 h-4 text-slate-500" />
-                      <span>My Profile & Addresses</span>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        setIsUserMenuOpen(false);
-                        onOpenProfile();
-                      }}
-                      className="w-full px-3 py-2 rounded-xl hover:bg-slate-100 text-slate-700 flex items-center gap-2.5 transition-colors font-medium text-left"
-                    >
-                      <Layers className="w-4 h-4 text-slate-500" />
-                      <span>My Orders History</span>
-                    </button>
-
-                    <div className="pt-1.5 border-t border-slate-100">
-                      <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                        Quick Demo Role Switch
+                {isUserMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden z-50 animate-fade-in text-xs">
+                    <div className="p-4 bg-slate-900 text-white">
+                      <p className="font-bold text-sm truncate">{currentUser.name}</p>
+                      <p className="text-[11px] text-slate-300 truncate">{currentUser.email}</p>
+                      <div className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 font-semibold text-[10px]">
+                        Signed In Customer
                       </div>
-                      <button
-                        onClick={() => {
-                          loginAs('customer');
-                          setIsUserMenuOpen(false);
-                        }}
-                        className={`w-full px-3 py-2 rounded-xl text-left flex items-center justify-between transition-colors ${
-                          currentUser?.role === 'customer'
-                            ? 'bg-blue-50 text-blue-700 font-bold'
-                            : 'text-slate-700 hover:bg-slate-100'
-                        }`}
-                      >
-                        <span>Customer (Rahul Sharma)</span>
-                        {currentUser?.role === 'customer' && <span className="w-2 h-2 rounded-full bg-blue-600" />}
-                      </button>
-                      <button
-                        onClick={() => {
-                          loginAs('admin');
-                          setIsUserMenuOpen(false);
-                          onOpenAdmin();
-                        }}
-                        className={`w-full px-3 py-2 rounded-xl text-left flex items-center justify-between transition-colors ${
-                          currentUser?.role === 'admin'
-                            ? 'bg-amber-50 text-amber-800 font-bold'
-                            : 'text-slate-700 hover:bg-slate-100'
-                        }`}
-                      >
-                        <span className="flex items-center gap-1.5">
-                          <Shield className="w-3.5 h-3.5 text-amber-600" />
-                          <span>Admin Store Manager</span>
-                        </span>
-                        {currentUser?.role === 'admin' && <span className="w-2 h-2 rounded-full bg-amber-600" />}
-                      </button>
                     </div>
 
-                    <div className="pt-1.5 border-t border-slate-100">
+                    <div className="p-2 space-y-1">
                       <button
                         onClick={() => {
                           setIsUserMenuOpen(false);
-                          onOpenAdmin();
+                          onOpenProfile();
                         }}
-                        className="w-full px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold flex items-center justify-center gap-1.5 transition-colors"
+                        className="w-full px-3 py-2 rounded-xl hover:bg-slate-100 text-slate-700 flex items-center gap-2.5 transition-colors font-medium text-left cursor-pointer"
                       >
-                        <Shield className="w-4 h-4 text-blue-400" />
-                        <span>Open Admin Panel</span>
+                        <User className="w-4 h-4 text-slate-500" />
+                        <span>My Profile &amp; Addresses</span>
                       </button>
+
+                      <button
+                        onClick={() => {
+                          setIsUserMenuOpen(false);
+                          onOpenProfile();
+                        }}
+                        className="w-full px-3 py-2 rounded-xl hover:bg-slate-100 text-slate-700 flex items-center gap-2.5 transition-colors font-medium text-left cursor-pointer"
+                      >
+                        <Layers className="w-4 h-4 text-slate-500" />
+                        <span>My Orders History</span>
+                      </button>
+
+                      <div className="pt-1.5 border-t border-slate-100">
+                        <button
+                          onClick={() => {
+                            logoutCustomer();
+                            setIsUserMenuOpen(false);
+                          }}
+                          className="w-full px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold flex items-center gap-2 transition-colors cursor-pointer"
+                        >
+                          <LogOut className="w-4 h-4 text-rose-600" />
+                          <span>Customer Logout</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
 
-            {/* Direct Admin Panel shortcut pill */}
+            {/* Direct Admin Portal shortcut pill */}
             <button
               onClick={onOpenAdmin}
-              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-colors shadow-xs"
+              className="hidden lg:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-colors shadow-xs cursor-pointer"
             >
               <Shield className="w-3.5 h-3.5 text-[#1688FF]" />
-              <span>Admin Panel</span>
+              <span>Admin Portal</span>
+              {isAdminAuthenticated && (
+                <span className="w-2 h-2 rounded-full bg-emerald-400" title="Admin Logged In" />
+              )}
             </button>
           </div>
         </div>

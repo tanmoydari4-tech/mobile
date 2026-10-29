@@ -87,6 +87,12 @@ interface StoreContextType {
   currentUser: User | null;
   setCurrentUser: (user: User | null) => void;
   loginAs: (role: 'customer' | 'admin') => void;
+  loginCustomer: (identifier: string, password: string) => { success: boolean; message: string; user?: User };
+  registerCustomer: (name: string, email: string, phone: string, password: string) => { success: boolean; message: string; user?: User };
+  logoutCustomer: () => void;
+  isAdminAuthenticated: boolean;
+  loginAdmin: (email: string, password: string) => { success: boolean; message: string };
+  logoutAdmin: () => void;
   registerUser: (name: string, email: string, phone: string) => User;
   addSavedAddress: (address: Omit<SavedAddress, 'id'>) => void;
   deleteSavedAddress: (addressId: string) => void;
@@ -178,8 +184,14 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   );
 
   // Users & Auth
+  const [users, setUsers] = useState<User[]>(() =>
+    getStoredItem<User[]>('users_list', INITIAL_USERS)
+  );
   const [currentUser, setCurrentUser] = useState<User | null>(() =>
-    getStoredItem<User | null>('current_user', INITIAL_USERS[0])
+    getStoredItem<User | null>('auth_customer_user', null)
+  );
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() =>
+    getStoredItem<boolean>('auth_admin_session', false)
   );
 
   // Reviews
@@ -236,7 +248,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => { setStoredItem('wishlist', wishlist); }, [wishlist]);
   useEffect(() => { setStoredItem('compare_list', compareList); }, [compareList]);
   useEffect(() => { setStoredItem('orders', orders); }, [orders]);
-  useEffect(() => { setStoredItem('current_user', currentUser); }, [currentUser]);
+  useEffect(() => { setStoredItem('users_list', users); }, [users]);
+  useEffect(() => { setStoredItem('auth_customer_user', currentUser); }, [currentUser]);
+  useEffect(() => { setStoredItem('auth_admin_session', isAdminAuthenticated); }, [isAdminAuthenticated]);
   useEffect(() => { setStoredItem('reviews', reviews); }, [reviews]);
   useEffect(() => { setStoredItem('inventory_logs', inventoryLogs); }, [inventoryLogs]);
   useEffect(() => { setStoredItem('site_settings', siteSettings); }, [siteSettings]);
@@ -665,24 +679,87 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Auth & Profile
   const loginAs = (role: 'customer' | 'admin') => {
     if (role === 'admin') {
-      setCurrentUser(INITIAL_USERS[1]);
+      setIsAdminAuthenticated(true);
     } else {
       setCurrentUser(INITIAL_USERS[0]);
     }
   };
 
-  const registerUser = (name: string, email: string, phone: string) => {
+  const loginCustomer = (identifier: string, password: string) => {
+    const cleanId = identifier.trim().toLowerCase();
+    const digitsOnly = identifier.replace(/\D/g, '');
+    const found = users.find(u => {
+      if (u.role !== 'customer') return false;
+      const emailMatch = u.email.toLowerCase() === cleanId;
+      const phoneDigits = u.phone.replace(/\D/g, '');
+      const phoneMatch = digitsOnly.length >= 10 && phoneDigits.endsWith(digitsOnly.slice(-10));
+      return emailMatch || phoneMatch;
+    });
+
+    if (!found) {
+      return { success: false, message: 'No customer account found with that email or mobile number. Please Sign Up first.' };
+    }
+
+    if ((found.password || '123456') !== password) {
+      return { success: false, message: 'Incorrect password. Please try again.' };
+    }
+
+    setCurrentUser(found);
+    if (found.wishlist && found.wishlist.length > 0) {
+      setWishlist(found.wishlist);
+    }
+    return { success: true, message: `Welcome back, ${found.name}!`, user: found };
+  };
+
+  const registerCustomer = (name: string, email: string, phone: string, password: string) => {
+    const cleanEmail = email.trim().toLowerCase();
+    const existing = users.find(u => u.email.toLowerCase() === cleanEmail);
+    if (existing) {
+      return { success: false, message: 'An account with this email already exists. Please Sign In instead.' };
+    }
+
     const newUser: User = {
       id: `usr-${Date.now()}`,
-      name,
-      email,
-      phone,
+      name: name.trim(),
+      email: cleanEmail,
+      phone: phone.trim(),
+      password,
       role: 'customer',
       addresses: [],
-      wishlist: []
+      wishlist: [...wishlist]
     };
+
+    setUsers(prev => [...prev, newUser]);
     setCurrentUser(newUser);
-    return newUser;
+    return { success: true, message: `Account created! Welcome, ${newUser.name}!`, user: newUser };
+  };
+
+  const logoutCustomer = () => {
+    setCurrentUser(null);
+  };
+
+  const loginAdmin = (email: string, password: string) => {
+    const cleanEmail = email.trim().toLowerCase();
+    if (
+      (cleanEmail === 'admin@smartzone.com' || cleanEmail === 'admin') &&
+      password === 'admin123'
+    ) {
+      setIsAdminAuthenticated(true);
+      return { success: true, message: 'Admin login successful!' };
+    }
+    return {
+      success: false,
+      message: 'Invalid Admin credentials. Use admin@smartzone.com / admin123'
+    };
+  };
+
+  const logoutAdmin = () => {
+    setIsAdminAuthenticated(false);
+  };
+
+  const registerUser = (name: string, email: string, phone: string) => {
+    const res = registerCustomer(name, email, phone, '123456');
+    return res.user || INITIAL_USERS[0];
   };
 
   const addSavedAddress = (addressData: Omit<SavedAddress, 'id'>) => {
@@ -696,6 +773,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       addresses: [...currentUser.addresses, newAddress]
     };
     setCurrentUser(updated);
+    setUsers(prev => prev.map(u => (u.id === updated.id ? updated : u)));
   };
 
   const deleteSavedAddress = (addressId: string) => {
@@ -705,11 +783,14 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       addresses: currentUser.addresses.filter(a => a.id !== addressId)
     };
     setCurrentUser(updated);
+    setUsers(prev => prev.map(u => (u.id === updated.id ? updated : u)));
   };
 
   const updateUserProfile = (data: Partial<User>) => {
     if (!currentUser) return;
-    setCurrentUser({ ...currentUser, ...data });
+    const updated = { ...currentUser, ...data };
+    setCurrentUser(updated);
+    setUsers(prev => prev.map(u => (u.id === updated.id ? updated : u)));
   };
 
   // Reviews
@@ -834,6 +915,12 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         currentUser,
         setCurrentUser,
         loginAs,
+        loginCustomer,
+        registerCustomer,
+        logoutCustomer,
+        isAdminAuthenticated,
+        loginAdmin,
+        logoutAdmin,
         registerUser,
         addSavedAddress,
         deleteSavedAddress,
