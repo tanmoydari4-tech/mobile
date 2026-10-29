@@ -238,22 +238,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <span>Sign In &amp; Continue</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
-
-              {/* Demo Customer Quick Login */}
-              <div className="pt-3 border-t border-slate-200 space-y-2">
-                <div className="flex items-center justify-between text-[11px] text-slate-500">
-                  <span>Demo Customer: <strong>rahul.sharma@example.com</strong></span>
-                  <span>Pass: <strong>123456</strong></span>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleDemoCustomerLogin}
-                  className="w-full py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-                  <span>1-Click Demo Customer Login</span>
-                </button>
-              </div>
             </form>
           ) : (
             <form onSubmit={handleRegisterSubmit} className="space-y-3">
