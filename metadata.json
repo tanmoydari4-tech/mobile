@@ -1,0 +1,6 @@
+{
+  "name": "SmartZone Mobile Store",
+  "description": "SmartZone Mobile Store - Premium Smartphone & Accessories Retailer with Local Delivery, Online Shopping, and Store Pickup.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
